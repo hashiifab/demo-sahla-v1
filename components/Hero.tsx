@@ -1,8 +1,11 @@
 "use client";
 
 import Image from "next/image";
+import { useState } from "react";
 
 export default function Hero() {
+  const [isLoading, setIsLoading] = useState(true);
+
   return (
     <section
       id="home"
@@ -14,6 +17,32 @@ export default function Hero() {
         color: "#FAF8F2",
       }}
     >
+      {/* — Preloader — */}
+      <div
+        style={{
+          position: "fixed",
+          inset: 0,
+          zIndex: 100,
+          background: "#FDFCF8",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          transition: "opacity 0.8s ease-in-out",
+          opacity: isLoading ? 1 : 0,
+          pointerEvents: isLoading ? "auto" : "none",
+        }}
+      >
+        <div style={{ animation: "pulse 1.5s infinite ease-in-out" }}>
+          <Image
+            src="/logo.png" // Pastikan path logo ini benar
+            alt="Sahla Madinah Logo"
+            width={120}
+            height={120}
+            priority
+          />
+        </div>
+      </div>
+
       {/* — Cinematic backdrop — */}
       <div
         className="ken-burns"
@@ -33,6 +62,7 @@ export default function Hero() {
             objectFit: "cover",
             objectPosition: "center",
           }}
+          onLoad={() => setIsLoading(false)}
         />
       </div>
 
