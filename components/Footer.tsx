@@ -1,6 +1,11 @@
-"use client";
-
+import Image from "next/image";
 import Logo from "./Logo";
+import {
+  InstagramIcon,
+  TikTokIcon,
+  YouTubeIcon,
+  WhatsAppIcon,
+} from "./SocialIcons";
 
 const navColumns = [
   {
@@ -24,10 +29,10 @@ const navColumns = [
 ];
 
 const socials = [
-  { label: "Instagram", abbr: "IG", href: "#" },
-  { label: "TikTok", abbr: "TT", href: "#" },
-  { label: "YouTube", abbr: "YT", href: "#" },
-  { label: "WhatsApp", abbr: "WA", href: "https://wa.me/628131181820" },
+  { label: "Instagram", href: "#", Icon: InstagramIcon },
+  { label: "TikTok", href: "#", Icon: TikTokIcon },
+  { label: "YouTube", href: "#", Icon: YouTubeIcon },
+  { label: "WhatsApp", href: "https://wa.me/628131181820", Icon: WhatsAppIcon },
 ];
 
 export default function Footer() {
@@ -38,33 +43,69 @@ export default function Footer() {
       {/* 
         ========================================================
         UPPER SECTION: PRE-FOOTER (Bento Grid Photo Collage)
-        Grid Editorial dengan foto melintasi beberapa kotak
         ========================================================
       */}
       <section 
         className="w-full flex flex-col lg:flex-row border-b border-[rgba(12,38,24,0.1)]"
         style={{ background: "#F0F5F2" }}
       >
-        {/* === KIRI: GRID BENTO (3 Kolom x 4 Baris) === */}
+        {/* === KHUSUS MOBILE: MICRO BENTO STRIP === */}
+        {/* Ditampilkan hanya di layar kecil, memberikan sentuhan visual tanpa membuat penuh */}
+        <div className="flex lg:hidden w-full h-[140px] sm:h-[180px] border-b border-[rgba(12,38,24,0.1)]">
+          <div className="relative w-1/3 overflow-hidden">
+            <Image
+              src="https://images.unsplash.com/photo-1542816417-0983c9c9ad53?w=400&q=70&auto=format&fit=crop"
+              alt=""
+              fill
+              loading="lazy"
+              sizes="33vw"
+              className="grayscale object-cover"
+            />
+          </div>
+          <div className="w-8 bg-[#C9A85C] border-l border-r border-[rgba(12,38,24,0.1)]" />
+          <div className="relative flex-1 overflow-hidden">
+            <Image
+              src="https://images.unsplash.com/photo-1591604129939-f1efa4d9f7fa?w=800&q=70&auto=format&fit=crop"
+              alt=""
+              fill
+              loading="lazy"
+              sizes="67vw"
+              className="grayscale object-cover"
+            />
+            <div className="absolute inset-0 border-l border-[rgba(253,252,248,0.4)]">
+              <div className="absolute inset-0 bg-black/10" />
+            </div>
+          </div>
+        </div>
+
+        {/* === KIRI: GRID BENTO DESKTOP (3x4) === */}
         <div className="hidden lg:grid w-1/4 grid-cols-3 grid-rows-4 gap-[1px] bg-[rgba(12,38,24,0.1)] border-r border-[rgba(12,38,24,0.1)]">
-          
           {/* Baris 1 */}
-          <div 
+          <div
             className="col-span-1 bg-[#F0F5F2]"
             style={{ backgroundImage: 'radial-gradient(circle, #163323 1px, transparent 1px)', backgroundSize: '8px 8px', opacity: 0.15 }}
           />
           <div className="col-span-1 bg-[#C9A85C]" />
-          <div 
-            className="col-span-1 bg-cover bg-center grayscale hover:grayscale-0 transition-all duration-700" 
-            style={{ backgroundImage: 'url("https://images.unsplash.com/photo-1542816417-0983c9c9ad53?q=80&w=400&auto=format&fit=crop")' }} 
-          />
-
-          {/* Baris 2 & 3: GAMBAR BESAR SPANNING (3 Kolom, 2 Baris) */}
-          <div 
-            className="col-span-3 row-span-2 relative bg-cover bg-center grayscale hover:grayscale-0 transition-all duration-700"
-            style={{ backgroundImage: 'url("https://images.unsplash.com/photo-1591604129939-f1efa4d9f7fa?q=80&w=800&auto=format&fit=crop")' }}
-          >
-            {/* GRID LINES OVERLAY: Garis pemisah di atas foto besar */}
+          <div className="relative col-span-1 overflow-hidden bento-grayscale">
+            <Image
+              src="https://images.unsplash.com/photo-1542816417-0983c9c9ad53?w=400&q=70&auto=format&fit=crop"
+              alt=""
+              fill
+              loading="lazy"
+              sizes="(max-width: 1024px) 0px, 8vw"
+              className="object-cover"
+            />
+          </div>
+          {/* Baris 2 & 3: GAMBAR BESAR */}
+          <div className="col-span-3 row-span-2 relative overflow-hidden bento-grayscale">
+            <Image
+              src="https://images.unsplash.com/photo-1591604129939-f1efa4d9f7fa?w=800&q=70&auto=format&fit=crop"
+              alt=""
+              fill
+              loading="lazy"
+              sizes="(max-width: 1024px) 0px, 25vw"
+              className="object-cover"
+            />
             <div className="absolute inset-0 grid grid-cols-3 grid-rows-2 pointer-events-none">
               <div className="border-r border-b border-[rgba(253,252,248,0.4)]"></div>
               <div className="border-r border-b border-[rgba(253,252,248,0.4)]"></div>
@@ -74,34 +115,38 @@ export default function Footer() {
               <div></div>
             </div>
           </div>
-
           {/* Baris 4 */}
           <div className="col-span-1 bg-[#3A5C4A]" />
-          <div 
+          <div
             className="col-span-1 bg-[#F0F5F2]"
             style={{ backgroundImage: 'radial-gradient(circle, #163323 1px, transparent 1px)', backgroundSize: '8px 8px', opacity: 0.15 }}
           />
-          <div 
-            className="col-span-1 bg-cover bg-center grayscale hover:grayscale-0 transition-all duration-700" 
-            style={{ backgroundImage: 'url("https://images.unsplash.com/photo-1542816417-0983c9c9ad53?q=80&w=400&auto=format&fit=crop")' }} 
-          />
+          <div className="relative col-span-1 overflow-hidden bento-grayscale">
+            <Image
+              src="https://images.unsplash.com/photo-1542816417-0983c9c9ad53?w=400&q=70&auto=format&fit=crop"
+              alt=""
+              fill
+              loading="lazy"
+              sizes="(max-width: 1024px) 0px, 8vw"
+              className="object-cover"
+            />
+          </div>
         </div>
 
         {/* === TENGAH: PESAN BRAND === */}
-        <div className="w-full lg:w-2/4 flex flex-col items-center justify-center p-12 lg:p-20 text-center bg-[#F0F5F2] min-h-[400px]">
-          {/* Logo variant default aman di background pastel */}
-          <div className="mb-10">
+        <div className="w-full lg:w-2/4 flex flex-col items-center justify-center p-12 lg:p-20 text-center bg-[#F0F5F2] min-h-[360px] lg:min-h-[400px]">
+          <div className="mb-8 lg:mb-10">
             <Logo size="lg" variant="default" />
           </div>
 
           <h2 
             className="font-display"
             style={{
-              fontSize: "clamp(32px, 4vw, 56px)",
+              fontSize: "clamp(32px, 5vw, 56px)",
               fontStyle: "italic",
               lineHeight: 1.15,
               color: "#163323",
-              marginBottom: "40px",
+              marginBottom: "32px",
               fontWeight: 400,
               maxWidth: "480px"
             }}
@@ -111,9 +156,9 @@ export default function Footer() {
             Pulang dengan <span style={{ color: "#C9A85C" }}>cerita</span>.
           </h2>
 
-          {/* CTA Button */}
           <a
             href="#produk"
+            className="btn-gold-hov"
             style={{
               display: "inline-flex",
               alignItems: "center",
@@ -127,55 +172,35 @@ export default function Footer() {
               padding: "16px 36px",
               textTransform: "uppercase",
               textDecoration: "none",
-              transition: "transform 0.3s ease, background 0.3s ease",
               boxShadow: "0 8px 24px rgba(201, 168, 92, 0.25)"
-            }}
-            onMouseEnter={(e) => {
-              (e.currentTarget as HTMLAnchorElement).style.background = "#E8D9A6";
-              (e.currentTarget as HTMLAnchorElement).style.transform = "translateY(-2px)";
-            }}
-            onMouseLeave={(e) => {
-              (e.currentTarget as HTMLAnchorElement).style.background = "#C9A85C";
-              (e.currentTarget as HTMLAnchorElement).style.transform = "translateY(0)";
             }}
           >
             Mulai Perjalanan
-            <svg
-              width="14"
-              height="14"
-              viewBox="0 0 14 14"
-              fill="none"
-              aria-hidden="true"
-            >
-              <path
-                d="M1 7h12M8 2l5 5-5 5"
-                stroke="currentColor"
-                strokeWidth="1.4"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+              <path d="M1 7h12M8 2l5 5-5 5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </a>
         </div>
 
-        {/* === KANAN: GRID BENTO (3 Kolom x 4 Baris) === */}
+        {/* === KANAN: GRID BENTO DESKTOP (3x4) === */}
         <div className="hidden lg:grid w-1/4 grid-cols-3 grid-rows-4 gap-[1px] bg-[rgba(12,38,24,0.1)] border-l border-[rgba(12,38,24,0.1)]">
-          
           {/* Baris 1 */}
-        
-        <div 
+          <div
             className="col-span-1 bg-[#F0F5F2]"
             style={{ backgroundImage: 'radial-gradient(circle, #163323 1px, transparent 1px)', backgroundSize: '8px 8px', opacity: 0.15 }}
           />
           <div className="col-span-1 bg-[#0C2618]" />
           <div className="col-span-1 bg-[#C9A85C]" />
-
-          {/* Baris 2 & 3: GAMBAR BESAR SPANNING */}
-          <div 
-            className="col-span-3 row-span-2 relative bg-cover bg-center grayscale hover:grayscale-0 transition-all duration-700"
-            style={{ backgroundImage: 'url("https://images.unsplash.com/photo-1591604129939-f1efa4d9f7fa?q=80&w=800&auto=format&fit=crop")' }}
-          >
-            {/* GRID LINES OVERLAY */}
+          {/* Baris 2 & 3: GAMBAR BESAR */}
+          <div className="col-span-3 row-span-2 relative overflow-hidden bento-grayscale">
+            <Image
+              src="https://images.unsplash.com/photo-1591604129939-f1efa4d9f7fa?w=800&q=70&auto=format&fit=crop"
+              alt=""
+              fill
+              loading="lazy"
+              sizes="(max-width: 1024px) 0px, 25vw"
+              className="object-cover"
+            />
             <div className="absolute inset-0 grid grid-cols-3 grid-rows-2 pointer-events-none">
               <div className="border-r border-b border-[rgba(253,252,248,0.4)]"></div>
               <div className="border-r border-b border-[rgba(253,252,248,0.4)]"></div>
@@ -185,13 +210,16 @@ export default function Footer() {
               <div></div>
             </div>
           </div>
-
-          {/* Baris 4: GAMBAR MELEBAR (3 Kolom, 1 Baris) */}
-          <div 
-            className="col-span-3 row-span-1 relative bg-cover bg-center grayscale hover:grayscale-0 transition-all duration-700"
-            style={{ backgroundImage: 'url("https://images.unsplash.com/photo-1542816417-0983c9c9ad53?q=80&w=400&auto=format&fit=crop")' }}
-          >
-            {/* GRID LINES OVERLAY */}
+          {/* Baris 4 */}
+          <div className="col-span-3 row-span-1 relative overflow-hidden bento-grayscale">
+            <Image
+              src="https://images.unsplash.com/photo-1542816417-0983c9c9ad53?w=600&q=70&auto=format&fit=crop"
+              alt=""
+              fill
+              loading="lazy"
+              sizes="(max-width: 1024px) 0px, 25vw"
+              className="object-cover"
+            />
             <div className="absolute inset-0 grid grid-cols-3 grid-rows-1 pointer-events-none">
               <div className="border-r border-[rgba(253,252,248,0.4)]"></div>
               <div className="border-r border-[rgba(253,252,248,0.4)]"></div>
@@ -204,11 +232,10 @@ export default function Footer() {
       {/* 
         ========================================================
         LOWER SECTION: DARK FOOTER MAIN GRID
-        Warna & Font persis dengan pedoman
         ========================================================
       */}
       <section 
-        className="w-full pt-20 pb-10 relative"
+        className="w-full pt-16 lg:pt-20 pb-10 relative"
         style={{ background: "#0C2618", color: "#FDFCF8" }}
       >
         <div 
@@ -218,9 +245,8 @@ export default function Footer() {
             paddingInline: "clamp(20px, 4vw, 40px)",
           }}
         >
-          {/* Baris Utama Navigasi & Doa */}
           <div 
-            className="grid grid-cols-1 lg:grid-cols-12 border-b border-[rgba(253,252,248,0.1)] pb-16"
+            className="grid grid-cols-1 lg:grid-cols-12 border-b border-[rgba(253,252,248,0.1)] pb-12 lg:pb-16"
             style={{ gap: "clamp(40px, 4vw, 64px)" }}
           >
             {/* Kiri: Kolom Doa Keberangkatan */}
@@ -270,9 +296,9 @@ export default function Footer() {
             </div>
 
             {/* Kanan: Navigasi dan Kontak */}
-            <div className="lg:col-span-7 flex flex-wrap gap-12 md:gap-20 lg:justify-end">
+            <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-10 lg:gap-20 lg:justify-items-end">
               {navColumns.map((col) => (
-                <div key={col.heading}>
+                <div key={col.heading} className="w-full lg:w-auto">
                   <h4
                     className="eyebrow"
                     style={{
@@ -301,18 +327,12 @@ export default function Footer() {
                       <li key={link.label}>
                         <a
                           href={link.href}
+                          className="hov-gold"
                           style={{
                             fontFamily: "var(--font-inter), Inter, sans-serif",
                             fontSize: "14px",
                             color: "rgba(253, 252, 248, 0.7)",
                             textDecoration: "none",
-                            transition: "color 0.3s ease",
-                          }}
-                          onMouseEnter={(e) => {
-                            (e.currentTarget as HTMLAnchorElement).style.color = "#C9A85C";
-                          }}
-                          onMouseLeave={(e) => {
-                            (e.currentTarget as HTMLAnchorElement).style.color = "rgba(253, 252, 248, 0.7)";
                           }}
                         >
                           {link.label}
@@ -323,8 +343,8 @@ export default function Footer() {
                 </div>
               ))}
 
-              {/* Kolom Kontak Spesifik */}
-              <div>
+              {/* Kolom Kontak */}
+              <div className="w-full lg:w-auto">
                 <h4
                   className="eyebrow"
                   style={{
@@ -345,7 +365,7 @@ export default function Footer() {
                       href="https://wa.me/628131181820"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="font-display"
+                      className="font-display hov-cream"
                       style={{
                         fontSize: "22px",
                         color: "#C9A85C",
@@ -354,13 +374,6 @@ export default function Footer() {
                         fontStyle: "italic",
                         display: "block",
                         marginBottom: "4px",
-                        transition: "color 0.3s ease"
-                      }}
-                      onMouseEnter={(e) => {
-                        (e.currentTarget as HTMLAnchorElement).style.color = "#FDFCF8";
-                      }}
-                      onMouseLeave={(e) => {
-                        (e.currentTarget as HTMLAnchorElement).style.color = "#C9A85C";
                       }}
                     >
                       +62 813-118-1820
@@ -369,18 +382,12 @@ export default function Footer() {
                   <div>
                     <a
                       href="mailto:hello@sahlamadinah.com"
+                      className="hov-gold"
                       style={{
                         fontFamily: "var(--font-inter), Inter, sans-serif",
                         fontSize: "14px",
                         color: "rgba(253, 252, 248, 0.7)",
                         textDecoration: "none",
-                        transition: "color 0.3s ease"
-                      }}
-                      onMouseEnter={(e) => {
-                        (e.currentTarget as HTMLAnchorElement).style.color = "#C9A85C";
-                      }}
-                      onMouseLeave={(e) => {
-                        (e.currentTarget as HTMLAnchorElement).style.color = "rgba(253, 252, 248, 0.7)";
                       }}
                     >
                       hello@sahlamadinah.com
@@ -392,15 +399,16 @@ export default function Footer() {
           </div>
 
           {/* Baris Paling Bawah (Copyright, Kebijakan, Socials) */}
-          <div className="flex flex-col md:flex-row justify-between items-center pt-8 gap-6">
+          <div className="flex flex-col-reverse md:flex-row justify-between items-center md:items-end pt-8 gap-6 md:gap-0">
             <div 
-              className="flex flex-col md:flex-row items-center gap-4 md:gap-8"
+              className="flex flex-col md:flex-row items-center md:items-start gap-3 md:gap-8 text-center md:text-left"
               style={{
                 fontFamily: "var(--font-inter), Inter, sans-serif",
                 fontSize: "13px",
                 color: "rgba(253, 252, 248, 0.4)",
               }}
             >
+              <span>© {year} PT. Sahla Madinah Berkah</span>
               <div className="flex items-center gap-4">
                 <a href="#" style={{ color: "rgba(253, 252, 248, 0.6)", textDecoration: "none" }} className="hover:text-[#C9A85C] transition-colors">
                   Kebijakan Privasi
@@ -409,39 +417,27 @@ export default function Footer() {
                   Syarat & Ketentuan
                 </a>
               </div>
-              <span>© {year} PT. Sahla Madinah Berkah</span>
             </div>
 
-            <div className="flex items-center gap-4">
-              {socials.map((s) => (
+            <div className="flex items-center justify-center gap-5">
+              {socials.map(({ label, href, Icon }) => (
                 <a
-                  key={s.label}
-                  href={s.href}
+                  key={label}
+                  href={href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  aria-label={s.label}
+                  aria-label={label}
+                  className="hov-gold inline-flex items-center justify-center"
                   style={{
-                    fontFamily: "var(--font-inter), Inter, sans-serif",
-                    fontSize: "11px",
-                    fontWeight: 600,
-                    letterSpacing: "0.08em",
                     color: "rgba(253, 252, 248, 0.6)",
                     textDecoration: "none",
-                    transition: "color 0.3s ease",
-                  }}
-                  onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLAnchorElement).style.color = "#C9A85C";
-                  }}
-                  onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLAnchorElement).style.color = "rgba(253, 252, 248, 0.6)";
                   }}
                 >
-                  {s.abbr}
+                  <Icon size={20} />
                 </a>
               ))}
             </div>
           </div>
-
         </div>
       </section>
     </footer>

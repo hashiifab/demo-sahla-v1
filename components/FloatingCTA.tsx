@@ -122,6 +122,7 @@ export default function FloatingCTA() {
         target="_blank"
         rel="noopener noreferrer"
         aria-label="Chat via WhatsApp"
+        className="fab-wa"
         style={{
           width: "60px",
           height: "60px",
@@ -132,21 +133,7 @@ export default function FloatingCTA() {
           justifyContent: "center",
           boxShadow: "0 12px 40px rgba(6, 35, 25, 0.35), 0 0 0 1px rgba(232, 217, 166, 0.22)",
           textDecoration: "none",
-          transition:
-            "transform 0.5s var(--ease-refined), box-shadow 0.5s var(--ease-refined), background 0.5s var(--ease-refined)",
           position: "relative",
-        }}
-        onMouseEnter={(e) => {
-          const el = e.currentTarget as HTMLAnchorElement;
-          el.style.transform = "scale(1.06)";
-          el.style.background = "#062319";
-          el.style.boxShadow = "0 18px 50px rgba(6, 35, 25, 0.45), 0 0 0 1px rgba(232, 217, 166, 0.35)";
-        }}
-        onMouseLeave={(e) => {
-          const el = e.currentTarget as HTMLAnchorElement;
-          el.style.transform = "scale(1)";
-          el.style.background = "#0B3D2C";
-          el.style.boxShadow = "0 12px 40px rgba(6, 35, 25, 0.35), 0 0 0 1px rgba(232, 217, 166, 0.22)";
         }}
       >
         <svg

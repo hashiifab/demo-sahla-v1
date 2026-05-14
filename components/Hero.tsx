@@ -1,10 +1,15 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function Hero() {
   const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const t = setTimeout(() => setIsLoading(false), 1200);
+    return () => clearTimeout(t);
+  }, []);
 
   return (
     <section
@@ -53,7 +58,7 @@ export default function Hero() {
         }}
       >
         <Image
-          src="https://images.unsplash.com/photo-1591604129939-f1efa4d9f7fa?w=1920&q=85"
+          src="https://images.unsplash.com/photo-1591604129939-f1efa4d9f7fa?w=1600&q=72&auto=format&fit=crop"
           alt=""
           fill
           priority
@@ -175,6 +180,7 @@ export default function Hero() {
             <div className="flex items-center" style={{ gap: "24px", flexWrap: "wrap" }}>
               <a
                 href="#produk"
+                className="btn-primary-hov"
                 style={{
                   display: "inline-flex",
                   alignItems: "center",
@@ -188,18 +194,6 @@ export default function Hero() {
                   textTransform: "uppercase",
                   padding: "20px 32px",
                   textDecoration: "none",
-                  transition:
-                    "background 0.5s var(--ease-refined), transform 0.5s var(--ease-refined)",
-                }}
-                onMouseEnter={(e) => {
-                  const el = e.currentTarget as HTMLAnchorElement;
-                  el.style.background = "#E8D9A6";
-                  el.style.transform = "translateY(-2px)";
-                }}
-                onMouseLeave={(e) => {
-                  const el = e.currentTarget as HTMLAnchorElement;
-                  el.style.background = "#FAF8F2";
-                  el.style.transform = "none";
                 }}
               >
                 Jelajahi Paket

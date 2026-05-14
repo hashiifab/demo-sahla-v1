@@ -15,7 +15,15 @@ export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 32);
+    let ticking = false;
+    const handleScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        setScrolled(window.scrollY > 32);
+        ticking = false;
+      });
+    };
     handleScroll();
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
@@ -48,7 +56,7 @@ export default function Navbar() {
       >
         {/* Logo */}
         <a href="#home" aria-label="Sahla Madinah — Beranda">
-          <Logo size="md" variant="default" />
+          <Logo size="md" variant="default" priority />
         </a>
 
         {/* Desktop Nav */}
@@ -101,7 +109,6 @@ export default function Navbar() {
               color: inkColor,
               border: `1px solid ${isSolid ? "rgba(20,20,20,0.18)" : "rgba(250,248,242,0.45)"}`,
               padding: "12px 22px",
-              borderRadius: "9999px",
               textDecoration: "none",
               transition:
                 "background 0.4s var(--ease-refined), color 0.4s var(--ease-refined), border-color 0.4s var(--ease-refined)",
@@ -229,7 +236,6 @@ export default function Navbar() {
               textTransform: "uppercase",
               textAlign: "center",
               padding: "20px",
-              borderRadius: "9999px",
               textDecoration: "none",
             }}
           >

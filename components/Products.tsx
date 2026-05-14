@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import Image from "next/image";
+import { useIsMobile } from "@/hooks/useIsMobile";
 
 interface ProductCard {
   number: string;
@@ -32,7 +33,7 @@ const cards: ProductCard[] = [
     buttonLabel: "Lihat detail kemitraan",
     buttonHref: "#produk",
     image:
-      "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=1200&q=85",
+      "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=900&q=72&auto=format&fit=crop",
     imageAlt: "Kabin pesawat dengan suasana tenang",
   },
   {
@@ -50,7 +51,7 @@ const cards: ProductCard[] = [
     buttonLabel: "Pelajari standar kami",
     buttonHref: "#custome",
     image:
-      "https://images.unsplash.com/photo-1553755088-ef1973c7b4a1?q=80&w=2340&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "https://images.unsplash.com/photo-1553755088-ef1973c7b4a1?w=900&q=72&auto=format&fit=crop",
     imageAlt: "Detail arsitektur Masjidil Haram",
   },
   {
@@ -67,14 +68,19 @@ const cards: ProductCard[] = [
     buttonLabel: "Jelajahi destinasi",
     buttonHref: "#produk",
     image:
-      "https://images.unsplash.com/photo-1541432901042-2d8bd64b4a9b?w=1200&q=85",
+      "https://images.unsplash.com/photo-1541432901042-2d8bd64b4a9b?w=900&q=72&auto=format&fit=crop",
     imageAlt: "Skyline Istanbul di senja hari",
   },
 ];
 
 export default function Products() {
-  const sectionRef = useRef<HTMLElement>(null);
+  const stickySectionRef = useRef<HTMLDivElement>(null);
+  const horizontalScrollRef = useRef<HTMLDivElement>(null);
+  const stickyContentRef = useRef<HTMLDivElement>(null);
+  const headerRef = useRef<HTMLDivElement>(null);
+  const isMobile = useIsMobile();
 
+  // Effect for card animations
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -92,263 +98,378 @@ export default function Products() {
       { threshold: 0.08 }
     );
 
-    if (sectionRef.current) observer.observe(sectionRef.current);
-    return () => observer.disconnect();
+    const section = document.getElementById("produk");
+    if (section) observer.observe(section);
+
+    return () => {
+      if (section) observer.unobserve(section);
+    };
   }, []);
 
+  // Effect for pinned horizontal scrolling (HANYA UNTUK MOBILE)
+  useEffect(() => {
+    const stickyEl = stickySectionRef.current;
+    const horizontalEl = horizontalScrollRef.current;
+    const stickyContentEl = stickyContentRef.current;
+
+    if (!isMobile) {
+      if (stickyEl) stickyEl.style.height = "auto";
+      if (horizontalEl) {
+        horizontalEl.style.overflowX = "visible";
+        horizontalEl.scrollLeft = 0;
+      }
+      return;
+    }
+
+    if (!stickyEl || !horizontalEl || !stickyContentEl) return;
+
+    if (horizontalEl) horizontalEl.style.overflowX = "hidden";
+
+    let rafId = 0;
+    let cachedEffectiveTop = 0;
+    let cachedPinDuration = 0;
+    const stickyOffset = 120;
+
+    const recalc = () => {
+      cachedPinDuration = horizontalEl.scrollWidth - horizontalEl.clientWidth;
+      stickyEl.style.height = `${
+        cachedPinDuration + stickyContentEl.offsetHeight
+      }px`;
+      cachedEffectiveTop = stickyEl.offsetTop - stickyOffset;
+    };
+
+    const calculateDimensions = () => {
+      cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(recalc);
+    };
+
+    calculateDimensions();
+
+    const resizeObserver = new ResizeObserver(calculateDimensions);
+    resizeObserver.observe(horizontalEl);
+    resizeObserver.observe(stickyContentEl);
+
+    let ticking = false;
+    const handleScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        const scrollTop = window.scrollY;
+        const effectiveStickyTop = cachedEffectiveTop;
+        const pinDuration = cachedPinDuration;
+        const buffer = 2;
+
+        if (
+          scrollTop > effectiveStickyTop + buffer &&
+          scrollTop < effectiveStickyTop + pinDuration - buffer
+        ) {
+          if (pinDuration > 0) {
+            const scrollProgress =
+              (scrollTop - effectiveStickyTop) / pinDuration;
+            horizontalEl.scrollLeft = scrollProgress * pinDuration;
+          }
+        } else if (scrollTop <= effectiveStickyTop + buffer) {
+          horizontalEl.scrollLeft = 0;
+        } else if (scrollTop >= effectiveStickyTop + pinDuration - buffer) {
+          horizontalEl.scrollLeft = pinDuration;
+        }
+        ticking = false;
+      });
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
+    return () => {
+      cancelAnimationFrame(rafId);
+      window.removeEventListener("scroll", handleScroll);
+      resizeObserver.disconnect();
+      if (stickyEl) {
+        stickyEl.style.height = "auto";
+      }
+    };
+  }, [isMobile]);
+
   return (
-    <section
-      id="produk"
-      ref={sectionRef}
-      style={{
-        background: "#FFFCF7",
-        paddingBlock: "clamp(96px, 14vw, 180px)",
-        overflow: "hidden",
-      }}
-    >
+    <section id="produk" style={{ background: "#FFFCF7" }}>
       <div
-        className="mx-auto"
         style={{
-          maxWidth: "1360px",
-          paddingInline: "clamp(20px, 4vw, 40px)",
+          paddingBlock: isMobile ? "64px" : "clamp(96px, 14vw, 180px)",
         }}
       >
-        {/* Header — editorial pull */}
         <div
-          className="flex flex-col lg:flex-row lg:items-end justify-between mb-20"
-          style={{ gap: "48px" }}
+          className="mx-auto"
+          style={{
+            maxWidth: "1360px",
+            paddingInline: "clamp(20px, 4vw, 40px)",
+          }}
         >
-          <div style={{ maxWidth: "640px" }}>
-            <div
-              className="flex items-center mb-6"
-              style={{ gap: "16px" }}
-            >
-              <span
-                style={{
-                  width: "48px",
-                  height: "1px",
-                  background: "#B5933A",
-                  display: "inline-block",
-                }}
-              />
-              <span
-                className="eyebrow"
-                style={{ color: "#B5933A" }}
+          {/* Header - Dipisahkan dari efek sticky agar scroll normal */}
+          <div
+            ref={headerRef}
+            className="flex flex-col lg:flex-row lg:items-end justify-between mb-16 lg:mb-20"
+            style={{ gap: "32px lg:48px" }}
+          >
+            <div style={{ maxWidth: "640px" }}>
+              <div
+                className="flex items-center mb-4 lg:mb-6"
+                style={{ gap: "16px" }}
               >
-                04 — Layanan Kami
-              </span>
+                <span
+                  style={{
+                    width: "48px",
+                    height: "1px",
+                    background: "#B5933A",
+                    display: "inline-block",
+                  }}
+                />
+                <span className="eyebrow" style={{ color: "#B5933A" }}>
+                  04 — Layanan Kami
+                </span>
+              </div>
+              <h2
+                className="font-display"
+                style={{
+                  fontSize: "clamp(36px, 5.6vw, 72px)",
+                  fontWeight: 400,
+                  color: "#141414",
+                  lineHeight: 1,
+                  letterSpacing: "-0.02em",
+                }}
+              >
+                Tiga pilar
+                <br />
+                <em
+                  style={{
+                    fontStyle: "italic",
+                    color: "#0B3D2C",
+                    fontWeight: 400,
+                  }}
+                >
+                  layanan
+                </em>{" "}
+                kami.
+              </h2>
             </div>
-            <h2
-              className="font-display"
+
+            <p
               style={{
-                fontSize: "clamp(40px, 5.6vw, 72px)",
-                fontWeight: 400,
-                color: "#141414",
-                lineHeight: 1,
-                letterSpacing: "-0.02em",
+                fontFamily: "var(--font-inter), Inter, sans-serif",
+                fontSize: isMobile ? "15px" : "16px",
+                lineHeight: 1.75,
+                color: "#44423C",
+                maxWidth: "360px",
               }}
             >
-              Tiga pilar
-              <br />
-              <em
-                style={{
-                  fontStyle: "italic",
-                  color: "#0B3D2C",
-                  fontWeight: 400,
-                }}
-              >
-                layanan
-              </em>{" "}
-              kami.
-            </h2>
+              Penyediaan tiket pesawat khusus penerbangan umroh dan haji,
+              layanan penuh dari ujung ke ujung, dan destinasi tambahan kelas
+              premium — disusun dalam tiga tingkatan yang jelas.
+            </p>
           </div>
 
-          <p
-            style={{
-              fontFamily: "var(--font-inter), Inter, sans-serif",
-              fontSize: "16px",
-              lineHeight: 1.75,
-              color: "#44423C",
-              maxWidth: "360px",
-            }}
-          >
-            Penyediaan tiket pesawat khusus penerbangan umroh dan haji, layanan
-            penuh dari ujung ke ujung, dan destinasi tambahan kelas premium —
-            disusun dalam tiga tingkatan yang jelas.
-          </p>
-        </div>
-
-        {/* Cards stack — editorial alternating layout */}
-        <div className="flex flex-col" style={{ gap: "32px" }}>
-          {cards.map((card, idx) => (
-            <article
-              key={card.title}
-              className="product-card"
+          {/* Wrapper untuk area yang akan menjadi sticky (HANYA KARTU) */}
+          <div ref={stickySectionRef} style={{ position: "relative" }}>
+            <div
+              ref={stickyContentRef}
               style={{
-                opacity: 0,
-                transform: "translateY(40px)",
-                transition: "opacity 0.9s var(--ease-refined), transform 0.9s var(--ease-refined)",
-                background: "#FAF8F2",
-                border: "1px solid #E0DAC9",
-                borderRadius: "4px",
+                position: isMobile ? "sticky" : "static",
+                // DIUBAH: Jarak dari atas layar saat menempel diperbesar menjadi 120px
+                top: isMobile ? "120px" : "auto", 
                 overflow: "hidden",
-                display: "grid",
-                gridTemplateColumns: "1fr",
+                paddingBottom: isMobile ? "24px" : "0",
               }}
             >
-              <div
-                className="grid grid-cols-1 lg:grid-cols-12"
-                style={{
-                  minHeight: "440px",
-                }}
-              >
-                {/* Image */}
+              {/* Container Scroll */}
+              <div ref={horizontalScrollRef} className="no-scrollbar">
                 <div
-                  className={`lg:col-span-5 ${idx % 2 === 1 ? "lg:order-2" : ""}`}
                   style={{
-                    position: "relative",
-                    minHeight: "320px",
-                    overflow: "hidden",
+                    display: "grid",
+                    gridTemplateColumns: "repeat(3, 1fr)",
+                    minWidth: isMobile ? "850px" : "100%",
+                    gap: isMobile ? "16px" : "32px",
                   }}
                 >
-                  <Image
-                    src={card.image}
-                    alt={card.imageAlt}
-                    fill
-                    sizes="(max-width: 1024px) 100vw, 40vw"
-                    style={{
-                      objectFit: "cover",
-                      transition: "transform 1.2s var(--ease-refined)",
-                    }}
-                  />
-                  {/* Number watermark */}
-                  <div
-                    className="font-display"
-                    style={{
-                      position: "absolute",
-                      top: "24px",
-                      left: "32px",
-                      fontSize: "20px",
-                      fontStyle: "italic",
-                      color: "#FAF8F2",
-                      letterSpacing: "0.2em",
-                      mixBlendMode: "difference",
-                    }}
-                  >
-                    {card.number}
-                  </div>
-                </div>
-
-                {/* Content */}
-                <div
-                  className="lg:col-span-7 flex flex-col justify-between"
-                  style={{
-                    padding: "clamp(40px, 5vw, 64px)",
-                  }}
-                >
-                  <div>
-                    <span
-                      className="eyebrow"
+                  {cards.map((card) => (
+                    <article
+                      key={card.title}
+                      className="product-card"
                       style={{
-                        color: "#B5933A",
-                        marginBottom: "20px",
-                        display: "inline-block",
+                        opacity: 0,
+                        transform: "translateY(40px)",
+                        transition:
+                          "opacity 0.9s var(--ease-refined), transform 0.9s var(--ease-refined)",
+                        background: "#FAF8F2",
+                        border: "1px solid #E0DAC9",
+                        borderRadius: "4px",
+                        overflow: "hidden",
+                        display: "flex",
+                        flexDirection: "column",
+                        height: "100%",
                       }}
                     >
-                      {card.eyebrow}
-                    </span>
-
-                    <h3
-                      className="font-display"
-                      style={{
-                        fontSize: "clamp(26px, 3vw, 38px)",
-                        fontWeight: 400,
-                        color: "#141414",
-                        lineHeight: 1.1,
-                        marginBottom: "20px",
-                        maxWidth: "20ch",
-                      }}
-                    >
-                      {card.title}
-                    </h3>
-
-                    <p
-                      style={{
-                        fontFamily: "var(--font-inter), Inter, sans-serif",
-                        fontSize: "16px",
-                        lineHeight: 1.75,
-                        color: "#44423C",
-                        marginBottom: "32px",
-                        maxWidth: "52ch",
-                      }}
-                    >
-                      {card.body}
-                    </p>
-
-                    {/* Features — refined two-col list */}
-                    <ul
-                      style={{
-                        listStyle: "none",
-                        padding: 0,
-                        margin: 0,
-                        display: "grid",
-                        gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-                        gap: "12px 24px",
-                        marginBottom: "40px",
-                      }}
-                    >
-                      {card.features.map((feat) => (
-                        <li
-                          key={feat}
+                      <div
+                        style={{
+                          position: "relative",
+                          minHeight: isMobile ? "220px" : "320px",
+                          overflow: "hidden",
+                        }}
+                      >
+                        <Image
+                          src={card.image}
+                          alt={card.imageAlt}
+                          fill
+                          sizes="(max-width: 1023px) 80vw, 30vw"
                           style={{
-                            display: "flex",
+                            objectFit: "cover",
+                            transition: "transform 1.2s var(--ease-refined)",
+                          }}
+                        />
+                        <div
+                          className="font-display"
+                          style={{
+                            position: "absolute",
+                            top: isMobile ? "16px" : "24px",
+                            left: isMobile ? "20px" : "32px",
+                            fontSize: isMobile ? "16px" : "20px",
+                            fontStyle: "italic",
+                            color: "#FAF8F2",
+                            letterSpacing: "0.2em",
+                            mixBlendMode: "difference",
+                          }}
+                        >
+                          {card.number}
+                        </div>
+                      </div>
+
+                      <div
+                        className="flex flex-col flex-1"
+                        style={{
+                          padding: isMobile ? "24px" : "clamp(40px, 5vw, 64px)",
+                        }}
+                      >
+                        <div className="flex-1">
+                          <span
+                            className="eyebrow"
+                            style={{
+                              color: "#B5933A",
+                              marginBottom: isMobile ? "12px" : "20px",
+                              display: "inline-block",
+                              fontSize: isMobile ? "11px" : "12px",
+                            }}
+                          >
+                            {card.eyebrow}
+                          </span>
+
+                          <h3
+                            className="font-display"
+                            style={{
+                              fontSize: isMobile
+                                ? "22px"
+                                : "clamp(26px, 3vw, 38px)",
+                              fontWeight: 400,
+                              color: "#141414",
+                              lineHeight: 1.1,
+                              marginBottom: isMobile ? "16px" : "20px",
+                              maxWidth: "20ch",
+                            }}
+                          >
+                            {card.title}
+                          </h3>
+
+                          <p
+                            style={{
+                              fontFamily:
+                                "var(--font-inter), Inter, sans-serif",
+                              fontSize: isMobile ? "14px" : "16px",
+                              lineHeight: 1.75,
+                              color: "#44423C",
+                              marginBottom: isMobile ? "24px" : "32px",
+                              maxWidth: "52ch",
+                            }}
+                          >
+                            {card.body}
+                          </p>
+
+                          <ul
+                            style={{
+                              listStyle: "none",
+                              padding: 0,
+                              margin: 0,
+                              display: "grid",
+                              gridTemplateColumns: isMobile
+                                ? "1fr"
+                                : "repeat(auto-fit, minmax(200px, 1fr))",
+                              gap: isMobile ? "10px" : "12px 24px",
+                              marginBottom: isMobile ? "28px" : "40px",
+                            }}
+                          >
+                            {card.features.map((feat) => (
+                              <li
+                                key={feat}
+                                style={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: "12px",
+                                  fontFamily:
+                                    "var(--font-inter), Inter, sans-serif",
+                                  fontSize: isMobile ? "13px" : "14px",
+                                  color: "#44423C",
+                                }}
+                              >
+                                <span
+                                  style={{
+                                    width: "16px",
+                                    height: "1px",
+                                    background: "#B5933A",
+                                    flexShrink: 0,
+                                  }}
+                                />
+                                {feat}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+
+                        <a
+                          href={card.buttonHref}
+                          className="link-underline"
+                          style={{
+                            display: "inline-flex",
                             alignItems: "center",
                             gap: "12px",
                             fontFamily: "var(--font-inter), Inter, sans-serif",
-                            fontSize: "14px",
-                            color: "#44423C",
+                            fontSize: "13px",
+                            fontWeight: 500,
+                            letterSpacing: "0.2em",
+                            textTransform: "uppercase",
+                            color: "#0B3D2C",
+                            textDecoration: "none",
+                            alignSelf: "flex-start",
                           }}
                         >
-                          <span
-                            style={{
-                              width: "16px",
-                              height: "1px",
-                              background: "#B5933A",
-                              flexShrink: 0,
-                            }}
-                          />
-                          {feat}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  <a
-                    href={card.buttonHref}
-                    className="link-underline"
-                    style={{
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: "12px",
-                      fontFamily: "var(--font-inter), Inter, sans-serif",
-                      fontSize: "13px",
-                      fontWeight: 500,
-                      letterSpacing: "0.2em",
-                      textTransform: "uppercase",
-                      color: "#0B3D2C",
-                      textDecoration: "none",
-                      alignSelf: "flex-start",
-                    }}
-                  >
-                    {card.buttonLabel}
-                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-                      <path d="M1 7h12M8 2l5 5-5 5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                  </a>
+                          {card.buttonLabel}
+                          <svg
+                            width="14"
+                            height="14"
+                            viewBox="0 0 14 14"
+                            fill="none"
+                            aria-hidden="true"
+                          >
+                            <path
+                              d="M1 7h12M8 2l5 5-5 5"
+                              stroke="currentColor"
+                              strokeWidth="1.4"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
+                        </a>
+                      </div>
+                    </article>
+                  ))}
                 </div>
               </div>
-            </article>
-          ))}
+            </div>
+          </div>
         </div>
       </div>
     </section>

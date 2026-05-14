@@ -37,8 +37,74 @@ const values: Value[] = [
 ];
 
 export default function TrustStrip() {
-  const sectionRef = useRef<HTMLElement>(null);
+  const stickySectionRef = useRef<HTMLElement>(null);
+  const horizontalScrollRef = useRef<HTMLDivElement>(null);
+  const stickyContentRef = useRef<HTMLDivElement>(null);
 
+  // Effect for pinned horizontal scrolling
+  useEffect(() => {
+    const stickyEl = stickySectionRef.current;
+    const horizontalEl = horizontalScrollRef.current;
+    const stickyContentEl = stickyContentRef.current;
+    if (!stickyEl || !horizontalEl || !stickyContentEl) return;
+
+    let rafId = 0;
+    let cachedStickyTop = 0;
+    let cachedPinDuration = 0;
+    let cachedScrollableWidth = 0;
+
+    const recalc = () => {
+      cachedPinDuration = horizontalEl.scrollWidth - horizontalEl.clientWidth;
+      cachedScrollableWidth = cachedPinDuration;
+      stickyEl.style.height = `${cachedPinDuration + stickyContentEl.offsetHeight}px`;
+      cachedStickyTop = stickyEl.offsetTop;
+    };
+
+    const calculateDimensions = () => {
+      cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(recalc);
+    };
+
+    calculateDimensions();
+
+    const resizeObserver = new ResizeObserver(calculateDimensions);
+    resizeObserver.observe(horizontalEl);
+    resizeObserver.observe(stickyContentEl);
+
+    let ticking = false;
+    const handleScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        const scrollTop = window.scrollY;
+        const stickyTop = cachedStickyTop;
+        const pinDuration = cachedPinDuration;
+        const buffer = 2;
+
+        if (scrollTop > stickyTop + buffer && scrollTop < stickyTop + pinDuration - buffer) {
+          if (pinDuration > 0) {
+            const scrollProgress = (scrollTop - stickyTop) / pinDuration;
+            horizontalEl.scrollLeft = scrollProgress * cachedScrollableWidth;
+          }
+        } else if (scrollTop <= stickyTop + buffer) {
+          horizontalEl.scrollLeft = 0;
+        } else if (scrollTop >= stickyTop + pinDuration - buffer) {
+          horizontalEl.scrollLeft = cachedScrollableWidth;
+        }
+        ticking = false;
+      });
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
+    return () => {
+      cancelAnimationFrame(rafId);
+      window.removeEventListener("scroll", handleScroll);
+      resizeObserver.disconnect();
+    };
+  }, []);
+
+  // Effect for reveal animations
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -53,174 +119,184 @@ export default function TrustStrip() {
           }
         });
       },
-      { threshold: 0.15 }
+      { threshold: 0.5 }
     );
 
-    if (sectionRef.current) observer.observe(sectionRef.current);
+    if (horizontalScrollRef.current) {
+      observer.observe(horizontalScrollRef.current);
+    }
     return () => observer.disconnect();
   }, []);
 
   return (
-    <section
-      id="nilai"
-      ref={sectionRef}
-      style={{
-        background: "#F4EFE4",
-        paddingBlock: "clamp(96px, 12vw, 140px)",
-        overflow: "hidden",
-      }}
-    >
+    <section ref={stickySectionRef} style={{ position: "relative" }}>
       <div
-        className="mx-auto"
+        ref={stickyContentRef}
         style={{
-          maxWidth: "1360px",
-          paddingInline: "clamp(20px, 4vw, 40px)",
+          position: "sticky",
+          top: "0px", // Pin to the top of the viewport
+          overflow: "hidden",
         }}
       >
-        {/* Header */}
         <div
-          className="flex flex-col lg:flex-row lg:items-end justify-between mb-20"
-          style={{ gap: "32px" }}
-        >
-          <div style={{ maxWidth: "560px" }}>
-            <div
-              className="flex items-center mb-6"
-              style={{ gap: "16px" }}
-            >
-              <span
-                style={{
-                  width: "48px",
-                  height: "1px",
-                  background: "#B5933A",
-                  display: "inline-block",
-                }}
-              />
-              <span
-                className="eyebrow"
-                style={{ color: "#B5933A" }}
-              >
-                02 — Janji Kami
-              </span>
-            </div>
-            <h2
-              className="font-display"
-              style={{
-                fontSize: "clamp(34px, 4.4vw, 56px)",
-                fontWeight: 400,
-                color: "#141414",
-                lineHeight: 1.08,
-              }}
-            >
-              Lima janji yang menjaga
-              <br />
-              <em
-                style={{
-                  fontStyle: "italic",
-                  color: "#0B3D2C",
-                  fontWeight: 400,
-                }}
-              >
-                ketenangan
-              </em>{" "}
-              Anda.
-            </h2>
-          </div>
-
-          <p
-            style={{
-              fontFamily: "var(--font-inter), Inter, sans-serif",
-              fontSize: "15px",
-              lineHeight: 1.75,
-              color: "#44423C",
-              maxWidth: "320px",
-            }}
-          >
-            Setiap janji ini bukan slogan pemasaran — ia adalah standar internal
-            yang kami ukur pada setiap keberangkatan.
-          </p>
-        </div>
-
-        {/* Pillars — 5-col editorial grid */}
-        <div
+          id="nilai"
           style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-            gap: "0",
-            borderTop: "1px solid #E0DAC9",
+            background: "#F4EFE4",
+            paddingBlock: "clamp(96px, 12vw, 140px)",
           }}
         >
-          {values.map((v, i) => (
+          <div
+            className="mx-auto"
+            style={{
+              maxWidth: "1360px",
+              paddingInline: "clamp(20px, 4vw, 40px)",
+            }}
+          >
+            {/* Header */}
             <div
-              key={v.title}
-              className="pillar"
-              style={{
-                opacity: 0,
-                transform: "translateY(28px)",
-                transition: "opacity 0.9s var(--ease-refined), transform 0.9s var(--ease-refined), background 0.5s var(--ease-refined)",
-                padding: "40px 28px 40px 0",
-                borderRight: i < values.length - 1 ? "1px solid #E0DAC9" : "none",
-                paddingInline: i === 0 ? "0 28px 0 0" : "28px",
-                position: "relative",
-                cursor: "default",
-              }}
-              onMouseEnter={(e) => {
-                const card = e.currentTarget as HTMLDivElement;
-                const goldLine = card.querySelector(".pillar-line") as HTMLElement;
-                if (goldLine) goldLine.style.width = "48px";
-              }}
-              onMouseLeave={(e) => {
-                const card = e.currentTarget as HTMLDivElement;
-                const goldLine = card.querySelector(".pillar-line") as HTMLElement;
-                if (goldLine) goldLine.style.width = "16px";
-              }}
+              className="flex flex-col lg:flex-row lg:items-end justify-between mb-20"
+              style={{ gap: "32px" }}
             >
-              <div
-                className="eyebrow"
-                style={{
-                  color: "#B5933A",
-                  marginBottom: "20px",
-                }}
-              >
-                {v.number}
+              <div style={{ maxWidth: "560px" }}>
+                <div
+                  className="flex items-center mb-6"
+                  style={{ gap: "16px" }}
+                >
+                  <span
+                    style={{
+                      width: "48px",
+                      height: "1px",
+                      background: "#B5933A",
+                      display: "inline-block",
+                    }}
+                  />
+                  <span
+                    className="eyebrow"
+                    style={{ color: "#B5933A" }}
+                  >
+                    02 — Janji Kami
+                  </span>
+                </div>
+                <h2
+                  className="font-display"
+                  style={{
+                    fontSize: "clamp(34px, 4.4vw, 56px)",
+                    fontWeight: 400,
+                    color: "#141414",
+                    lineHeight: 1.08,
+                  }}
+                >
+                  Lima janji yang menjaga
+                  <br />
+                  <em
+                    style={{
+                      fontStyle: "italic",
+                      color: "#0B3D2C",
+                      fontWeight: 400,
+                    }}
+                  >
+                    ketenangan
+                  </em>{" "}
+                  Anda.
+                </h2>
               </div>
-
-              <div
-                className="font-display"
-                style={{
-                  fontSize: "30px",
-                  fontWeight: 400,
-                  color: "#141414",
-                  marginBottom: "12px",
-                  lineHeight: 1,
-                }}
-              >
-                {v.title}
-              </div>
-
-              <span
-                className="pillar-line"
-                style={{
-                  display: "block",
-                  width: "16px",
-                  height: "1px",
-                  background: "#B5933A",
-                  marginBottom: "16px",
-                  transition: "width 0.6s var(--ease-refined)",
-                }}
-              />
 
               <p
                 style={{
                   fontFamily: "var(--font-inter), Inter, sans-serif",
-                  fontSize: "14px",
-                  lineHeight: 1.7,
+                  fontSize: "15px",
+                  lineHeight: 1.75,
                   color: "#44423C",
+                  maxWidth: "320px",
                 }}
               >
-                {v.tagline}
+                Setiap janji ini bukan slogan pemasaran — ia adalah standar internal
+                yang kami ukur pada setiap keberangkatan.
               </p>
             </div>
-          ))}
+
+            {/* Pillars — Horizontally scrolling container */}
+            <div
+              ref={horizontalScrollRef}
+              className="no-scrollbar"
+              style={{
+                overflowX: "hidden", // We control scroll via JS
+              }}
+            >
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(5, 1fr)",
+                  minWidth: "1100px", // Force container to be wide
+                  gap: "0",
+                  borderTop: "1px solid #E0DAC9",
+                }}
+              >
+                {values.map((v, i) => (
+                  <div
+                    key={v.title}
+                    className="pillar"
+                    style={{
+                      opacity: 0,
+                      transform: "translateY(28px)",
+                      transition: "opacity 0.9s var(--ease-refined), transform 0.9s var(--ease-refined), background 0.5s var(--ease-refined)",
+                      padding: "40px 28px",
+                      borderRight: i < values.length - 1 ? "1px solid #E0DAC9" : "none",
+                      position: "relative",
+                      cursor: "default",
+                    }}
+                  >
+                    {/* ... pillar content ... */}
+                    <div
+                      className="eyebrow"
+                      style={{
+                        color: "#B5933A",
+                        marginBottom: "20px",
+                      }}
+                    >
+                      {v.number}
+                    </div>
+
+                    <div
+                      className="font-display"
+                      style={{
+                        fontSize: "30px",
+                        fontWeight: 400,
+                        color: "#141414",
+                        marginBottom: "12px",
+                        lineHeight: 1,
+                      }}
+                    >
+                      {v.title}
+                    </div>
+
+                    <span
+                      className="pillar-line"
+                      style={{
+                        display: "block",
+                        width: "16px",
+                        height: "1px",
+                        background: "#B5933A",
+                        marginBottom: "16px",
+                        transition: "width 0.6s var(--ease-refined)",
+                      }}
+                    />
+
+                    <p
+                      style={{
+                        fontFamily: "var(--font-inter), Inter, sans-serif",
+                        fontSize: "14px",
+                        lineHeight: 1.7,
+                        color: "#44423C",
+                      }}
+                    >
+                      {v.tagline}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>

@@ -91,7 +91,7 @@ export default function About() {
               }}
             >
               <Image
-                src="https://images.unsplash.com/photo-1542816417-0983c9c9ad53?w=1200&q=85"
+                src="https://images.unsplash.com/photo-1542816417-0983c9c9ad53?w=700&q=72&auto=format&fit=crop"
                 alt="Detail interior Masjid Nabawi"
                 fill
                 sizes="(max-width: 1024px) 100vw, 440px"

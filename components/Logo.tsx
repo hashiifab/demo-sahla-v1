@@ -3,9 +3,14 @@ import Image from "next/image";
 interface LogoProps {
   variant?: "default" | "white";
   size?: "sm" | "md" | "lg";
+  priority?: boolean;
 }
 
-export default function Logo({ variant = "default", size = "md" }: LogoProps) {
+export default function Logo({
+  variant = "default",
+  size = "md",
+  priority = false,
+}: LogoProps) {
   const isWhite = variant === "white";
 
   const sizes = {
@@ -30,7 +35,7 @@ export default function Logo({ variant = "default", size = "md" }: LogoProps) {
         src="/logo.png"
         alt="Sahla Madinah"
         fill
-        priority
+        priority={priority}
         sizes={`${w}px`}
         style={{
           objectFit: "contain",

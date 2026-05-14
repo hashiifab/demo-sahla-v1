@@ -228,7 +228,7 @@ export default function VisionMission() {
               {misiItems.map((item, i) => (
                 <li
                   key={item.title}
-                  className="reveal"
+                  className="reveal misi-row"
                   style={{
                     display: "grid",
                     gridTemplateColumns: "auto 1fr",
@@ -236,14 +236,7 @@ export default function VisionMission() {
                     paddingBlock: "28px",
                     borderTop: "1px solid #E0DAC9",
                     borderBottom: i === misiItems.length - 1 ? "1px solid #E0DAC9" : "none",
-                    transition: "background 0.5s var(--ease-refined)",
                     cursor: "default",
-                  }}
-                  onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLLIElement).style.background = "rgba(232, 217, 166, 0.08)";
-                  }}
-                  onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLLIElement).style.background = "transparent";
                   }}
                 >
                   <span
