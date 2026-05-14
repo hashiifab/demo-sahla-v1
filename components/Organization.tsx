@@ -91,26 +91,25 @@ export default function Organization() {
     if (horizontalEl) horizontalEl.style.overflowX = "hidden";
 
     let rafId = 0;
-    let cachedEffectiveTop = 0;
     let cachedPinDuration = 0;
     const stickyOffset = 120;
 
+    // Only cache scrollWidth-based values — safe to cache, unaffected by
+    // images loading above. offsetTop is read live so layout shifts don't break sync.
     const recalc = () => {
       cachedPinDuration = horizontalEl.scrollWidth - horizontalEl.clientWidth;
       stickyEl.style.height = `${
         cachedPinDuration + stickyContentEl.offsetHeight
       }px`;
-      cachedEffectiveTop = stickyEl.offsetTop - stickyOffset;
     };
 
-    const calculateDimensions = () => {
+    // Let images above (Products cards, About) finish loading before first measure
+    const initTimer = setTimeout(recalc, 200);
+
+    const resizeObserver = new ResizeObserver(() => {
       cancelAnimationFrame(rafId);
       rafId = requestAnimationFrame(recalc);
-    };
-
-    calculateDimensions();
-
-    const resizeObserver = new ResizeObserver(calculateDimensions);
+    });
     resizeObserver.observe(horizontalEl);
     resizeObserver.observe(stickyContentEl);
 
@@ -120,7 +119,8 @@ export default function Organization() {
       ticking = true;
       requestAnimationFrame(() => {
         const scrollTop = window.scrollY;
-        const effectiveStickyTop = cachedEffectiveTop;
+        // Read offsetTop live — always accurate even after images shift layout
+        const effectiveStickyTop = stickyEl.offsetTop - stickyOffset;
         const pinDuration = cachedPinDuration;
         const buffer = 2;
 
@@ -145,6 +145,7 @@ export default function Organization() {
     window.addEventListener("scroll", handleScroll, { passive: true });
 
     return () => {
+      clearTimeout(initTimer);
       cancelAnimationFrame(rafId);
       window.removeEventListener("scroll", handleScroll);
       resizeObserver.disconnect();

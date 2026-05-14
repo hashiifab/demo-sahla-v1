@@ -49,25 +49,20 @@ export default function TrustStrip() {
     if (!stickyEl || !horizontalEl || !stickyContentEl) return;
 
     let rafId = 0;
-    let cachedStickyTop = 0;
     let cachedPinDuration = 0;
-    let cachedScrollableWidth = 0;
 
     const recalc = () => {
       cachedPinDuration = horizontalEl.scrollWidth - horizontalEl.clientWidth;
-      cachedScrollableWidth = cachedPinDuration;
       stickyEl.style.height = `${cachedPinDuration + stickyContentEl.offsetHeight}px`;
-      cachedStickyTop = stickyEl.offsetTop;
     };
 
-    const calculateDimensions = () => {
+    // Let About image above settle before first measure
+    const initTimer = setTimeout(recalc, 200);
+
+    const resizeObserver = new ResizeObserver(() => {
       cancelAnimationFrame(rafId);
       rafId = requestAnimationFrame(recalc);
-    };
-
-    calculateDimensions();
-
-    const resizeObserver = new ResizeObserver(calculateDimensions);
+    });
     resizeObserver.observe(horizontalEl);
     resizeObserver.observe(stickyContentEl);
 
@@ -77,19 +72,20 @@ export default function TrustStrip() {
       ticking = true;
       requestAnimationFrame(() => {
         const scrollTop = window.scrollY;
-        const stickyTop = cachedStickyTop;
+        // Read offsetTop live — always accurate even after images shift layout
+        const stickyTop = stickyEl.offsetTop;
         const pinDuration = cachedPinDuration;
         const buffer = 2;
 
         if (scrollTop > stickyTop + buffer && scrollTop < stickyTop + pinDuration - buffer) {
           if (pinDuration > 0) {
             const scrollProgress = (scrollTop - stickyTop) / pinDuration;
-            horizontalEl.scrollLeft = scrollProgress * cachedScrollableWidth;
+            horizontalEl.scrollLeft = scrollProgress * pinDuration;
           }
         } else if (scrollTop <= stickyTop + buffer) {
           horizontalEl.scrollLeft = 0;
         } else if (scrollTop >= stickyTop + pinDuration - buffer) {
-          horizontalEl.scrollLeft = cachedScrollableWidth;
+          horizontalEl.scrollLeft = pinDuration;
         }
         ticking = false;
       });
@@ -98,6 +94,7 @@ export default function TrustStrip() {
     window.addEventListener("scroll", handleScroll, { passive: true });
 
     return () => {
+      clearTimeout(initTimer);
       cancelAnimationFrame(rafId);
       window.removeEventListener("scroll", handleScroll);
       resizeObserver.disconnect();
