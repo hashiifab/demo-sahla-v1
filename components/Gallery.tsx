@@ -213,9 +213,10 @@ export default function Gallery() {
           <div
             className="lg:col-span-5"
             style={{
-              display: "flex",
-              flexDirection: isMobile ? "row" : "column", // Berjejer ke samping di HP, numpuk di Desktop
+              display: isMobile ? "flex" : "grid", // Tetap flex di mobile, ganti ke grid di desktop
+              flexDirection: isMobile ? "row" : "column", // Diabaikan di desktop (grid), berlaku di mobile (flex)
               gap: isMobile ? "16px" : "24px",
+              gridTemplateRows: isMobile ? "none" : "repeat(2, 1fr)", // Buat 2 baris dengan tinggi sama
             }}
           >
             {[images[1], images[2]].map((img, i) => (
@@ -235,12 +236,12 @@ export default function Gallery() {
                 <div
                   style={{
                     position: "relative",
-                    // Aspek rasio disamakan jadi 4/5 di mobile agar semua foto tingginya sama saat di-swipe
-                    aspectRatio: isMobile ? "4/5" : "4/3", 
+                    // On desktop, height is 100% to fill the grid cell. On mobile, use aspect ratio.
+                    height: isMobile ? "auto" : "100%",
+                    aspectRatio: isMobile ? "4/5" : "auto",
                     overflow: "hidden",
                     borderRadius: "4px",
                     boxShadow: "0 20px 50px rgba(6, 35, 25, 0.12)",
-                    height: "100%",
                   }}
                 >
                   <Image
